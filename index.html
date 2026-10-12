@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Tap Tech on YouTube</title>
+<meta name="description" content="Opening One Tap Tech in the YouTube app">
+<meta property="og:title" content="One Tap Tech | iPhone automations">
+<meta property="og:description" content="100 Automations Challenge · new video every Sunday & Wednesday">
+<style>
+  :root { --bg:#10131e; --txt:#f3f1ec; --mut:#9aa0b4; --sa:#ff8a1f; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--txt); font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:24px 16px; text-align:center; }
+  .wrap { max-width:360px; width:100%; }
+  .logo { width:84px; height:84px; border-radius:50%; background:var(--sa); color:#10131e; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-weight:800; font-size:44px; }
+  h1 { font-size:20px; margin:0 0 6px; }
+  p { color:var(--mut); margin:0 0 22px; font-size:14px; }
+  a.btn { display:block; padding:15px 16px; border-radius:14px; font-weight:700; text-decoration:none; margin-bottom:10px; }
+  a.yt { background:#ff0033; color:#fff; }
+  a.web { border:1px solid #2a3044; color:var(--txt); }
+  .hint { font-size:12px; color:var(--mut); margin-top:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">1</div>
+  <h1>One Tap Tech</h1>
+  <p id="msg">Opening the YouTube app…</p>
+  <a class="btn yt" id="app" href="#">▶ Open in YouTube app</a>
+  <a class="btn web" id="web" href="#">Open in browser</a>
+  <div class="hint" id="hint" hidden>Still in Instagram? Tap ⋯ at the top and choose “Open in external browser”.</div>
+</div>
+<script>
+  // ---- What to open ----
+  // Default: the One Tap Tech channel. Add ?v=VIDEO_ID to the link to open a specific video instead,
+  // e.g.  …/index.html?v=lJqz_j4zvM4
+  var CHANNEL_ID = "UC_J_P18fXYYMoI1xCtgzU5w";           // youtube.com/@One1TapTech
+  var params = new URLSearchParams(location.search);
+  var v = (params.get("v") || "").replace(/[^A-Za-z0-9_-]/g, "");
+
+  var webUrl = v ? "https://www.youtube.com/watch?v=" + v
+                 : "https://www.youtube.com/channel/" + CHANNEL_ID + "?sub_confirmation=1";
+  var path   = v ? "www.youtube.com/watch?v=" + v
+                 : "www.youtube.com/channel/" + CHANNEL_ID;
+
+  // App links: the iPhone link is the one YouTube itself publishes for this channel (vnd.youtube://…);
+  // Android uses an intent that names the YouTube app and falls back to the website.
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var iosApp = "vnd.youtube://" + path;
+  var androidApp = "intent://" + path + "#Intent;scheme=https;package=com.google.android.youtube;S.browser_fallback_url=" + encodeURIComponent(webUrl) + ";end";
+  var appUrl = isAndroid ? androidApp : isIOS ? iosApp : webUrl;
+
+  document.getElementById("app").href = appUrl;
+  document.getElementById("web").href = webUrl;
+  if (v) document.getElementById("msg").textContent = "Opening the video in the YouTube app…";
+
+  if (isAndroid || isIOS) {
+    // try the app straight away; if we're still here after a moment, show the buttons and hint
+    window.location.href = appUrl;
+    setTimeout(function () {
+      if (!document.hidden) {
+        document.getElementById("msg").textContent = "Tap the button to open YouTube.";
+        document.getElementById("hint").hidden = false;
+      }
+    }, 1800);
+  } else {
+    window.location.replace(webUrl);                       // computers: just go to YouTube
+  }
+</script>
+</body>
+</html>
